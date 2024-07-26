@@ -13,5 +13,5 @@ public interface FaqService {
 
     ResponseFaq update(RequestUpdateFaq faq);
 
-    void delete(String faqId);
+    boolean delete(String faqId);
 }

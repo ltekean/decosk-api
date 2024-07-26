@@ -1,17 +1,19 @@
 package com.saysimple.supports.controller;
 
+import com.saysimple.supports.dto.SupportSearchDto;
+import com.saysimple.supports.entity.Support;
 import com.saysimple.supports.service.SupportService;
-import com.saysimple.supports.vo.ListSupport;
 import com.saysimple.supports.vo.RequestSupport;
 import com.saysimple.supports.vo.RequestUpdateSupport;
 import com.saysimple.supports.vo.ResponseSupport;
 import io.micrometer.core.annotation.Timed;
+import jakarta.validation.constraints.Positive;
 import org.saysimple.aop.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +23,7 @@ import java.util.List;
 public class SupportController {
     private final Environment env;
     private final SupportService supportService;
+    private Object mapper;
 
 
     @Autowired
@@ -33,7 +36,7 @@ public class SupportController {
     @Timed(value = "users.status", longTask = true)
     public String status() {
         return String.format("It's Working in User Service"
-                + ", port(local.server.port)=" + env.getProperty("local.server.port")
+                + ", port(local.server.port)=" + env.getProperty("local.seßrver.port")
                 + ", port(server.port)=" + env.getProperty("server.port")
                 + ", gateway ip(env)=" + env.getProperty("gateway.ip")
                 + ", token expiration time=" + env.getProperty("token.expiration_time")
@@ -47,7 +50,7 @@ public class SupportController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ListSupport>> list() {
+    public ResponseEntity<List<ResponseSupport>> list() {
         return ResponseEntity.status(HttpStatus.OK).body(supportService.list());
     }
 
@@ -56,16 +59,12 @@ public class SupportController {
         return ResponseEntity.status(HttpStatus.OK).body(supportService.get(supportId));
     }
 
-<<<<<<< HEAD
     //    @RequestMapping(value = "/search", method = RequestMethod.GET)
     //    public  void getSearch() throws Exception {
     //
     //    }
 
-    @PutMapping("/supports")
-=======
     @PutMapping
->>>>>>> 3e3dff5c331a19347e114961cb540816e4f702e5
     public ResponseEntity<ResponseSupport> update(@RequestBody RequestUpdateSupport support) {
         return ResponseEntity.status(HttpStatus.OK).body(supportService.update(support));
     }
@@ -75,5 +74,20 @@ public class SupportController {
         supportService.delete(supportId);
 
         return ResponseEntity.status(HttpStatus.OK).body(true);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResponseSupport> searchByTitle(@RequestParam(value ="title",required = false) String title,
+                                      @RequestParam @Positive int page,
+                                      @RequestParam @Positive int size) {
+
+        if (page <= 1) {
+            page = 1; // Ensure page is at least 1
+        }
+
+        Page<Support> pageSupports = supportService.searchByTitle(title, page, size);
+        List<Support> supports = pageSupports.getContent();
+
+        return new ResponseEntity<>(new SupportSearchDto(mapper.toString(supports),pageSupports),HttpStatus.OK);
     }
 }

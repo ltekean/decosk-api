@@ -62,8 +62,12 @@ public class FaqController {
 
     @DeleteMapping("/{faqId}")
     public ResponseEntity<Boolean> delete(@PathVariable("faqId") String faqId) {
-        faqService.delete(faqId);
+        boolean isDeleted = faqService.delete(faqId);
 
-        return ResponseEntity.status(HttpStatus.OK).body(true);
+        if (isDeleted) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 Not Found 또는 적절한 상태 코드
+        }
     }
 }

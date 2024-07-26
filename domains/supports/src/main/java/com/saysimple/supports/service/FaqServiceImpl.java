@@ -72,10 +72,11 @@ public class FaqServiceImpl implements FaqService {
 
     // 문의내역 D
     @Override
-    public void delete(String faqId) {
+    public boolean delete(String faqId) {
         Faq faq = faqRepository.findByFaqId(faqId).orElseThrow(() ->
                 new NotFoundException(com.saysimple.supports.aop.FaqErrorEnum.FAQ_NOT_FOUND.getMsg()));
 
         faqRepository.delete(faq);
+        return false;
     }
 }
